@@ -1,5 +1,5 @@
-import { motion, useMotionValue, useTransform } from 'framer-motion';
-import { useEffect, useRef, useState } from 'react';
+import { motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 
 const assets = {
   hero: 'https://www.figma.com/api/mcp/asset/df8fcea4-251f-4dda-955f-9e1878d3d026',
@@ -102,6 +102,13 @@ const riseIn = {
   animate: { opacity: 1, y: 0, transition: { duration: 0.48, ease: [0.22, 1, 0.36, 1] } },
 };
 
+const radiusReveal = (radius) => ({
+  initial: { borderRadius: 16 },
+  whileInView: { borderRadius: radius },
+  viewport: { once: false, amount: 0.18 },
+  transition: { borderRadius: { duration: 2.35, ease: [0.16, 1, 0.3, 1] } },
+});
+
 const preloadImage = (src) =>
   new Promise((resolve) => {
     const image = new Image();
@@ -190,10 +197,10 @@ function LoadingShell() {
           <div className="skeleton h-[54px] w-[54px] rounded-full" />
           <div className="skeleton h-[54px] w-[54px] rounded-full" />
         </div>
-        <div className="skeleton absolute left-5 top-[148px] h-4 w-[214px] rounded-full" />
-        <div className="skeleton absolute left-5 top-[182px] h-14 w-[260px] rounded-2xl" />
+        <div className="skeleton absolute left-5 top-[132px] h-4 w-[214px] rounded-full" />
+        <div className="skeleton absolute left-5 top-[166px] h-8 w-[250px] rounded-xl" />
         <div className="absolute left-0 top-[266px] w-full overflow-hidden px-5">
-          <div className="flex w-max gap-1">
+          <div className="flex w-max gap-2">
             <div className="skeleton h-16 w-[166px] shrink-0 rounded-[18px]" />
             <div className="skeleton h-16 w-[164px] shrink-0 rounded-[18px]" />
             <div className="skeleton h-16 w-[172px] shrink-0 rounded-[18px]" />
@@ -203,7 +210,7 @@ function LoadingShell() {
       <div className="relative -mt-[88px] min-h-[calc(100dvh-371px)] rounded-t-[32px] bg-white px-5 pt-5">
         <div className="skeleton h-9 w-[230px] rounded-xl" />
         <div className="skeleton mt-2 h-5 w-[260px] rounded-lg" />
-        <div className="mt-5 flex gap-1 overflow-hidden">
+        <div className="-mx-5 mt-5 flex gap-1 overflow-hidden px-5">
           <div className="skeleton h-[222px] w-[222px] shrink-0 rounded-[24px]" />
           <div className="skeleton h-[222px] w-[222px] shrink-0 rounded-[24px]" />
         </div>
@@ -257,17 +264,17 @@ function HomeSummer({ notify, activeTab, setActiveTab }) {
                 onClick={() => notify(`${title} added to your day`)}
                 className="w-[222px] shrink-0 text-left"
               >
-                <div className="relative h-[222px] overflow-hidden rounded-[24px] bg-[#d7e3dc]">
+                <motion.div {...radiusReveal(24)} className="relative h-[222px] overflow-hidden bg-[#d7e3dc]">
                   {cropStyle ? (
                     <img src={image} alt="" className="absolute max-w-none" style={cropStyle} />
                   ) : (
                     <img src={image} alt="" className="absolute inset-0 h-full w-full max-w-none object-cover" />
                   )}
-                  {hasOverlay && <div className="absolute inset-0 rounded-[24px] bg-gradient-to-b from-black/0 to-black/40" />}
+                  {hasOverlay && <div className="absolute inset-0 bg-gradient-to-b from-black/0 to-black/40" />}
                   <span className="absolute left-3 top-3 rounded-full bg-white/15 px-2.5 py-1 text-[8px] font-bold uppercase tracking-[0.08em] text-white backdrop-blur-md">
                     {tag}
                   </span>
-                </div>
+                </motion.div>
                 <p className="mt-3 text-[18px] font-bold leading-5 tracking-[-0.01em]">{title}</p>
                 <p className="mt-2 flex items-center gap-1 text-[12px] font-medium leading-4 text-[#78846e]">
                   <IconAsset src={assets.timeIcon} size={16} /> {time}
@@ -279,8 +286,12 @@ function HomeSummer({ notify, activeTab, setActiveTab }) {
           <motion.button
             variants={riseIn}
             whileTap={{ scale: 0.985 }}
+            initial={{ borderRadius: 16 }}
+            whileInView={{ borderRadius: 24 }}
+            viewport={{ once: false, amount: 0.25 }}
+            transition={{ borderRadius: { duration: 2.35, ease: [0.16, 1, 0.3, 1] } }}
             onClick={() => notify('Insurance offer opened')}
-            className="mt-8 flex w-full items-center justify-between rounded-[24px] bg-[#edf2f0] p-4 text-left"
+            className="mt-8 flex w-full items-center justify-between bg-[#edf2f0] p-4 text-left"
           >
           <span className="flex items-center gap-2.5">
             <span className="grid h-[52px] w-[52px] place-items-center overflow-hidden rounded-2xl">
@@ -375,8 +386,12 @@ function Hero({ notify }) {
               key={title}
               variants={riseIn}
               whileTap={{ scale: 0.97 }}
+              initial={{ borderRadius: 16 }}
+              whileInView={{ borderRadius: 18 }}
+              viewport={{ once: false, amount: 0.7 }}
+              transition={{ borderRadius: { duration: 2.1, ease: [0.16, 1, 0.3, 1] } }}
               onClick={() => notify(`${title} selected`)}
-              className="flex h-16 shrink-0 items-center gap-3.5 rounded-[18px] bg-white/20 px-5 py-4 text-left text-white backdrop-blur-xl"
+              className="flex h-16 shrink-0 items-center gap-3.5 bg-white/20 px-5 py-4 text-left text-white backdrop-blur-xl"
               style={{ width }}
             >
               <IconAsset src={icon} size={24} />
@@ -432,46 +447,23 @@ function SectionHeader({ title, subtitle, seeAllTop = false }) {
 }
 
 function AiPlanner({ notify }) {
-  const cardRef = useRef(null);
-  const enterProgress = useMotionValue(0);
-  const borderRadius = useTransform(enterProgress, [0, 1], [16, 32]);
-  const imageY = useTransform(enterProgress, [0, 1], [18, -10]);
-  const imageScale = useTransform(enterProgress, [0, 1], [1.06, 1]);
-
-  useEffect(() => {
-    const card = cardRef.current;
-    if (!card) return undefined;
-
-    const scroller = card.closest('.ios-scroll');
-    const updateProgress = () => {
-      const cardRect = card.getBoundingClientRect();
-      const viewportBottom = scroller ? scroller.getBoundingClientRect().bottom : window.innerHeight;
-      const visibleTopAmount = viewportBottom - cardRect.top;
-      enterProgress.set(Math.min(1, Math.max(0, visibleTopAmount / 100)));
-    };
-
-    updateProgress();
-    scroller?.addEventListener('scroll', updateProgress, { passive: true });
-    window.addEventListener('resize', updateProgress);
-
-    return () => {
-      scroller?.removeEventListener('scroll', updateProgress);
-      window.removeEventListener('resize', updateProgress);
-    };
-  }, [enterProgress]);
-
   return (
     <motion.section
-      ref={cardRef}
       variants={riseIn}
+      initial={{ borderRadius: 16 }}
+      whileInView={{ borderRadius: 32 }}
+      viewport={{ once: false, amount: 0.12 }}
+      transition={{ borderRadius: { duration: 2.5, ease: [0.16, 1, 0.3, 1] } }}
       className="relative mt-8 h-[586px] overflow-hidden bg-[#009bf5] px-4 pb-[52px] pt-[221px] text-center text-white shadow-none"
-      style={{ borderRadius }}
     >
       <motion.img
         src={assets.aiCloud}
         alt=""
         className="absolute left-[-6px] top-[-9px] h-[606px] w-[374px] max-w-none object-cover"
-        style={{ y: imageY, scale: imageScale }}
+        initial={{ y: 10, scale: 1.03 }}
+        whileInView={{ y: 0, scale: 1 }}
+        viewport={{ once: false, amount: 0.12 }}
+        transition={{ duration: 2.6, ease: [0.16, 1, 0.3, 1] }}
       />
       <div className="relative z-10 flex h-full flex-col items-center justify-between">
         <div>
@@ -504,7 +496,7 @@ function AiPlanner({ notify }) {
 function BottomNav({ activeTab, setActiveTab }) {
   return (
     <div
-      className="fixed bottom-0 left-1/2 z-40 h-[50px] w-full max-w-[402px] -translate-x-1/2 px-4 pb-[21px] pt-[10px] lg:absolute lg:left-0 lg:translate-x-0"
+      className="fixed bottom-0 left-1/2 z-40 h-[50px] w-full max-w-[402px] -translate-x-1/2 px-4 pb-[21px] pt-[10px]"
       style={{
         background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 100%)',
       }}
