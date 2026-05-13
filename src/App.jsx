@@ -165,7 +165,7 @@ function App() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
             onScroll={(event) => setTopBarDark(event.currentTarget.scrollTop > 250)}
-            className="ios-scroll relative h-[100dvh] w-full max-w-[402px] overflow-y-auto overflow-x-hidden bg-white shadow-2xl lg:h-[874px] lg:rounded-[38px] no-scrollbar"
+            className="ios-scroll relative h-[100dvh] w-full max-w-[402px] overflow-y-auto overflow-x-hidden bg-white shadow-2xl lg:h-[calc(100dvh-64px)] lg:rounded-[38px] no-scrollbar"
           >
             <HomeSummer notify={notify} activeTab={activeTab} setActiveTab={setActiveTab} />
             <TopBar notify={notify} dark={topBarDark} />
@@ -190,7 +190,7 @@ function App() {
 
 function LoadingShell() {
   return (
-    <section className="relative h-[100dvh] min-h-[100svh] w-full max-w-[402px] overflow-hidden bg-white shadow-2xl lg:h-[874px] lg:min-h-0 lg:rounded-[38px]">
+    <section className="relative h-[100dvh] min-h-[100svh] w-full max-w-[402px] overflow-hidden bg-white shadow-2xl lg:h-[calc(100dvh-64px)] lg:min-h-0 lg:rounded-[38px]">
       <div className="relative h-[459px] overflow-hidden bg-[#e7ecea]">
         <div className="skeleton absolute left-5 top-16 h-8 w-8 rounded-lg" />
         <div className="absolute right-5 top-16 flex gap-2">
