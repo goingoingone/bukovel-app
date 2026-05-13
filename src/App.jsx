@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion';
-import { useEffect, useState } from 'react';
+import { motion, useMotionValue, useTransform } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
 
 const assets = {
   hero: 'https://www.figma.com/api/mcp/asset/df8fcea4-251f-4dda-955f-9e1878d3d026',
@@ -162,6 +162,7 @@ function App() {
           >
             <HomeSummer notify={notify} activeTab={activeTab} setActiveTab={setActiveTab} />
             <TopBar notify={notify} dark={topBarDark} />
+            <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
             {toast && (
               <motion.div
                 initial={{ opacity: 0, y: -14, x: '-50%' }}
@@ -175,15 +176,6 @@ function App() {
           </motion.section>
         )}
 
-        <aside className="hidden max-w-sm pt-12 lg:block">
-          <p className="text-sm font-semibold uppercase tracking-[0.28em] text-[#6f7c65]">Bukovel mobile app</p>
-          <h1 className="mt-4 text-5xl font-medium leading-[1.04] tracking-normal text-[#2c3624]">
-            Figma home screen rebuilt as a working React page.
-          </h1>
-          <p className="mt-5 text-lg leading-8 text-[#61705a]">
-            The mobile frame is scrollable, keeps the fixed nav, and includes working tap states for the key actions.
-          </p>
-        </aside>
       </div>
     </main>
   );
@@ -354,8 +346,6 @@ function HomeSummer({ notify, activeTab, setActiveTab }) {
 
           <AiPlanner notify={notify} />
       </motion.section>
-
-      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
     </motion.div>
   );
 }
@@ -410,7 +400,7 @@ function TopBar({ notify, dark }) {
     : undefined;
 
   return (
-    <div className="pointer-events-none fixed left-1/2 top-0 z-40 h-[123px] w-full max-w-[402px] -translate-x-1/2 lg:top-8">
+    <div className="pointer-events-none fixed left-1/2 top-0 z-40 h-[123px] w-full max-w-[402px] -translate-x-1/2 lg:absolute lg:left-0 lg:top-0 lg:translate-x-0">
       <nav className="absolute left-5 right-5 top-16 flex items-center justify-between">
         <img src={assets.logo} alt="Bukovel" className="h-8 w-8 object-contain transition-[filter] duration-200" style={{ filter: iconFilter }} />
         <div className="pointer-events-auto flex items-center gap-2">
@@ -442,12 +432,47 @@ function SectionHeader({ title, subtitle, seeAllTop = false }) {
 }
 
 function AiPlanner({ notify }) {
+  const cardRef = useRef(null);
+  const enterProgress = useMotionValue(0);
+  const borderRadius = useTransform(enterProgress, [0, 1], [16, 32]);
+  const imageY = useTransform(enterProgress, [0, 1], [18, -10]);
+  const imageScale = useTransform(enterProgress, [0, 1], [1.06, 1]);
+
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return undefined;
+
+    const scroller = card.closest('.ios-scroll');
+    const updateProgress = () => {
+      const cardRect = card.getBoundingClientRect();
+      const viewportBottom = scroller ? scroller.getBoundingClientRect().bottom : window.innerHeight;
+      const visibleTopAmount = viewportBottom - cardRect.top;
+      enterProgress.set(Math.min(1, Math.max(0, visibleTopAmount / 100)));
+    };
+
+    updateProgress();
+    scroller?.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('resize', updateProgress);
+
+    return () => {
+      scroller?.removeEventListener('scroll', updateProgress);
+      window.removeEventListener('resize', updateProgress);
+    };
+  }, [enterProgress]);
+
   return (
     <motion.section
+      ref={cardRef}
       variants={riseIn}
-      className="relative mt-8 h-[586px] overflow-hidden rounded-[32px] bg-[#009bf5] px-4 pb-[52px] pt-[221px] text-center text-white shadow-none"
+      className="relative mt-8 h-[586px] overflow-hidden bg-[#009bf5] px-4 pb-[52px] pt-[221px] text-center text-white shadow-none"
+      style={{ borderRadius }}
     >
-      <img src={assets.aiCloud} alt="" className="absolute left-[-6px] top-[-9px] h-[606px] w-[374px] max-w-none object-cover" />
+      <motion.img
+        src={assets.aiCloud}
+        alt=""
+        className="absolute left-[-6px] top-[-9px] h-[606px] w-[374px] max-w-none object-cover"
+        style={{ y: imageY, scale: imageScale }}
+      />
       <div className="relative z-10 flex h-full flex-col items-center justify-between">
         <div>
           <p className="flex items-center justify-center gap-1.5 text-[10px] font-bold uppercase leading-4 tracking-[0.08em]">
@@ -479,7 +504,7 @@ function AiPlanner({ notify }) {
 function BottomNav({ activeTab, setActiveTab }) {
   return (
     <div
-      className="fixed bottom-0 left-1/2 z-40 h-[50px] w-full max-w-[402px] -translate-x-1/2 px-4 pb-[21px] pt-[10px] lg:absolute"
+      className="fixed bottom-0 left-1/2 z-40 h-[50px] w-full max-w-[402px] -translate-x-1/2 px-4 pb-[21px] pt-[10px] lg:absolute lg:left-0 lg:translate-x-0"
       style={{
         background: 'linear-gradient(180deg, rgba(255,255,255,0) 0%, #ffffff 100%)',
       }}
